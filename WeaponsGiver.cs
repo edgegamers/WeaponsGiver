@@ -5,6 +5,8 @@ using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
+using System;
+using System.Timers;
 
 namespace WeaponsGiver
 {
@@ -21,7 +23,7 @@ namespace WeaponsGiver
         public override string ModuleName => "WeaponsGiver";
         public override string ModuleAuthor => "ji";
         public override string ModuleDescription => "Ensures players in custom gamemodes spawn with starting weapons.";
-        public override string ModuleVersion => "build4";
+        public override string ModuleVersion => "build5";
 
         public override void Load(bool hotReload)
         {
@@ -48,9 +50,13 @@ namespace WeaponsGiver
 
         private HookResult Event_PlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            var player = @event.Userid;
-            
-            if(!player.IsValid || !player.PlayerPawn.IsValid) return HookResult.Continue;       
+            this.AddTimer(1, ()=>GiveWeapons(@event.Userid));
+            return HookResult.Continue;
+        }
+
+        private void GiveWeapons(CCSPlayerController player)
+        {
+            if(!player.IsValid || !player.PlayerPawn.IsValid) return;       
 
             switch((CsTeam)player.TeamNum)
             {
@@ -66,8 +72,6 @@ namespace WeaponsGiver
                     if(!String.IsNullOrEmpty(ctMelee)) player.GiveNamedItem(ctMelee);
                     break;
             }
-
-            return HookResult.Continue;
         }
     }
 }
