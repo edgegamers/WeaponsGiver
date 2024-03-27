@@ -1,14 +1,12 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
-using CounterStrikeSharp.API.Modules.Memory;
-using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
 
 namespace WeaponsGiver
 {
-    [MinimumApiVersion(175)]
+    [MinimumApiVersion(198)]
     public class WeaponsGiver : BasePlugin
     {
         private string tPrimary;
@@ -21,7 +19,7 @@ namespace WeaponsGiver
         public override string ModuleName => "WeaponsGiver";
         public override string ModuleAuthor => "ji";
         public override string ModuleDescription => "Ensures players in custom gamemodes spawn with starting weapons.";
-        public override string ModuleVersion => "build4";
+        public override string ModuleVersion => "build6";
 
         public override void Load(bool hotReload)
         {
@@ -48,9 +46,14 @@ namespace WeaponsGiver
 
         private HookResult Event_PlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            var player = @event.Userid;
-            
-            if(!player.IsValid || !player.PlayerPawn.IsValid) return HookResult.Continue;       
+            Server.RunOnTick(Server.TickCount + 1, () => GiveWeapons(@event.Userid));
+            return HookResult.Continue;
+        }
+
+        private void GiveWeapons(CCSPlayerController player)
+        {
+            if(!player.IsValid || !player.PlayerPawn.IsValid) return;
+            if (player.Connected != PlayerConnectedState.PlayerConnected) return;
 
             switch((CsTeam)player.TeamNum)
             {
@@ -66,8 +69,6 @@ namespace WeaponsGiver
                     if(!String.IsNullOrEmpty(ctMelee)) player.GiveNamedItem(ctMelee);
                     break;
             }
-
-            return HookResult.Continue;
         }
     }
 }
