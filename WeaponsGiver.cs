@@ -56,6 +56,8 @@ namespace WeaponsGiver
         {
             if(!player.IsValid || !player.PlayerPawn.IsValid) return;
             if (player.Connected != PlayerConnectedState.PlayerConnected) return;
+            
+            player.RemoveWeapons();
 
             switch(player.Team)
             {
