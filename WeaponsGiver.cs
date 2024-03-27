@@ -9,17 +9,17 @@ namespace WeaponsGiver
     [MinimumApiVersion(198)]
     public class WeaponsGiver : BasePlugin
     {
-        private string tPrimary;
-        private string tSecondary;
-        private string tMelee;
-        private string ctPrimary;
-        private string ctSecondary;
-        private string ctMelee;
+        private string tPrimary = "";
+        private string tSecondary = "";
+        private string tMelee = "";
+        private string ctPrimary = "";
+        private string ctSecondary = "";
+        private string ctMelee = "";
 
         public override string ModuleName => "WeaponsGiver";
         public override string ModuleAuthor => "ji";
         public override string ModuleDescription => "Ensures players in custom gamemodes spawn with starting weapons.";
-        public override string ModuleVersion => "build6";
+        public override string ModuleVersion => "build7";
 
         public override void Load(bool hotReload)
         {
@@ -27,15 +27,14 @@ namespace WeaponsGiver
             RegisterEventHandler<EventRoundPrestart>(Event_RoundPrestart, HookMode.Pre);
         }
 
-        public void GetVars()
+        private void GetVars()
         {
-            tPrimary = ConVar.Find("mp_t_default_primary").StringValue;
-            tSecondary = ConVar.Find("mp_t_default_secondary").StringValue;
-            tMelee = ConVar.Find("mp_t_default_melee").StringValue;
-            ctPrimary = ConVar.Find("mp_ct_default_primary").StringValue;
-            ctSecondary = ConVar.Find("mp_ct_default_secondary").StringValue;
-            ctMelee = ConVar.Find("mp_ct_default_melee").StringValue;
-            
+            tPrimary = ConVar.Find("mp_t_default_primary")?.StringValue ?? "";
+            tSecondary = ConVar.Find("mp_t_default_secondary")?.StringValue ?? "";
+            tMelee = ConVar.Find("mp_t_default_melee")?.StringValue ?? "";
+            ctPrimary = ConVar.Find("mp_ct_default_primary")?.StringValue ?? "";
+            ctSecondary = ConVar.Find("mp_ct_default_secondary")?.StringValue ?? "";
+            ctMelee = ConVar.Find("mp_ct_default_melee")?.StringValue ?? "";
         }
 
         private HookResult Event_RoundPrestart(EventRoundPrestart @event, GameEventInfo info)
@@ -46,7 +45,10 @@ namespace WeaponsGiver
 
         private HookResult Event_PlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            Server.RunOnTick(Server.TickCount + 1, () => GiveWeapons(@event.Userid));
+            var player = @event.Userid;
+            if(!player.IsValid || player.Connected != PlayerConnectedState.PlayerConnected)
+                return HookResult.Continue;
+            Server.RunOnTick(Server.TickCount + 1, () => GiveWeapons(player));
             return HookResult.Continue;
         }
 
@@ -55,18 +57,18 @@ namespace WeaponsGiver
             if(!player.IsValid || !player.PlayerPawn.IsValid) return;
             if (player.Connected != PlayerConnectedState.PlayerConnected) return;
 
-            switch((CsTeam)player.TeamNum)
+            switch(player.Team)
             {
                 case CsTeam.Terrorist:
-                    if(!String.IsNullOrEmpty(tPrimary)) player.GiveNamedItem(tPrimary);
-                    if(!String.IsNullOrEmpty(tSecondary)) player.GiveNamedItem(tSecondary);
-                    if(!String.IsNullOrEmpty(tMelee)) player.GiveNamedItem(tMelee);
+                    if(!string.IsNullOrEmpty(tPrimary)) player.GiveNamedItem(tPrimary);
+                    if(!string.IsNullOrEmpty(tSecondary)) player.GiveNamedItem(tSecondary);
+                    if(!string.IsNullOrEmpty(tMelee)) player.GiveNamedItem(tMelee);
                     break;
                 
                 case CsTeam.CounterTerrorist:
-                    if(!String.IsNullOrEmpty(ctPrimary)) player.GiveNamedItem(ctPrimary);
-                    if(!String.IsNullOrEmpty(ctSecondary)) player.GiveNamedItem(ctSecondary);
-                    if(!String.IsNullOrEmpty(ctMelee)) player.GiveNamedItem(ctMelee);
+                    if(!string.IsNullOrEmpty(ctPrimary)) player.GiveNamedItem(ctPrimary);
+                    if(!string.IsNullOrEmpty(ctSecondary)) player.GiveNamedItem(ctSecondary);
+                    if(!string.IsNullOrEmpty(ctMelee)) player.GiveNamedItem(ctMelee);
                     break;
             }
         }
