@@ -22,11 +22,11 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: net7.0-artifacts
+          name: net8.0-artifacts
           path: |
-            bin/Debug/net7.0/publish/WeaponsGiver.deps.json
-            bin/Debug/net7.0/publish/WeaponsGiver.dll
-            bin/Debug/net7.0/publish/WeaponsGiver.pdb
+            bin/Debug/net8.0/publish/WeaponsGiver.deps.json
+            bin/Debug/net8.0/publish/WeaponsGiver.dll
+            bin/Debug/net8.0/publish/WeaponsGiver.pdb
 
   release:
     needs: build
@@ -35,8 +35,8 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: net7.0-artifacts
-          path: bin/Debug/net7.0
+          name: net8.0-artifacts
+          path: bin/Debug/net8.0
 
       - name: Create Tag
         id: tag_version
@@ -57,7 +57,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          files: bin/Debug/net7.0/*
+          files: bin/Debug/net8.0/*
           prerelease: ${{ env.IS_PRERELEASE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
