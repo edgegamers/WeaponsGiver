@@ -48,10 +48,10 @@ namespace WeaponsGiver {
     private HookResult Event_PlayerSpawn(EventPlayerSpawn @event,
       GameEventInfo info) {
       var player = @event.Userid;
-      if (!player.IsValid
+      if (player == null || !player.IsValid
         || player.Connected != PlayerConnectedState.PlayerConnected)
         return HookResult.Continue;
-      AddTimer(0.3f, () => GiveWeapons(player));
+      Server.RunOnTick(Server.TickCount + 1, () => GiveWeapons(player));
       return HookResult.Continue;
     }
 
